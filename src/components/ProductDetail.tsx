@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   Star, 
   ShoppingCart, 
@@ -209,20 +210,46 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
       </header>
 
       <main className="flex-1 overflow-y-auto no-scrollbar pb-10" onScroll={handleMainScroll}>
-        <div className="relative aspect-square bg-white overflow-hidden group">
-          {product.media && product.media[activeImage] ? (
-            <img src={product.media[activeImage]} alt={product.title} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-          ) : (
-            <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-              <ImageIcon size={48} className="text-gray-300" />
-            </div>
-          )}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2">
+        <div className="relative aspect-square bg-white overflow-hidden group touch-none">
+          <AnimatePresence initial={false} mode="wait">
+            <motion.div
+              key={activeImage}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.2 }}
+              drag="x"
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.2}
+              onDragEnd={(_, info) => {
+                if (info.offset.x > 100 && activeImage > 0) {
+                  setActiveImage(activeImage - 1);
+                } else if (info.offset.x < -100 && activeImage < (product.media?.length || 1) - 1) {
+                  setActiveImage(activeImage + 1);
+                }
+              }}
+              className="w-full h-full cursor-grab active:cursor-grabbing"
+            >
+              {product.media && product.media[activeImage] ? (
+                <img 
+                  src={product.media[activeImage]} 
+                  alt={product.title} 
+                  className="w-full h-full object-cover pointer-events-none select-none" 
+                  referrerPolicy="no-referrer" 
+                />
+              ) : (
+                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                  <ImageIcon size={48} className="text-gray-300" />
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
             {product.media?.map((_: any, idx: number) => (
-              <button key={`media-dot-${idx}`} onClick={() => setActiveImage(idx)} className={`h-1.5 rounded-full transition-all duration-300 ${idx === activeImage ? 'w-6 bg-green-500' : 'w-1.5 bg-gray-300'}`} />
+              <button key={`media-dot-${idx}`} onClick={() => setActiveImage(idx)} className={`h-1.5 rounded-full transition-all duration-300 ${idx === activeImage ? 'w-6 bg-green-500' : 'w-1.5 bg-gray-300/60'}`} />
             ))}
           </div>
-          <div className="absolute bottom-6 right-6 bg-black/50 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur-md font-medium tracking-widest">{activeImage + 1} / {product.media?.length || 0}</div>
+          <div className="absolute bottom-6 right-6 bg-black/40 text-white text-[10px] px-3 py-1 rounded-full backdrop-blur-md font-bold tracking-wider z-10">{activeImage + 1} / {product.media?.length || 0}</div>
         </div>
 
         <div className="px-4 py-5 space-y-5">
@@ -456,6 +483,65 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
               </div>
             </section>
           )}
+
+          <section className="px-4 py-8 border-t border-gray-100 -mx-4">
+            <img 
+              alt="Tokopedia Logo" 
+              className="w-[30%] mb-4 object-contain" 
+              referrerPolicy="no-referrer" 
+              src="https://www.ethic.ninja/wp-content/uploads/2017/11/logo-tokopedia.png" 
+            />
+            <h3 className="font-bold text-base mb-4">Jelajah Tokopedia</h3>
+            <ul className="space-y-4">
+              <li>
+                <a href="https://www.tokopedia.com/official-store?t_id=1777513306107&t_st=5&t_pp=product_detail&t_efo=search_pure_goods_card&t_ef=goods_search&t_sm=&t_spt=search_result" className="text-sm text-gray-600 font-medium hover:text-green-500 block">Mall</a>
+              </li>
+              <li>
+                <a href="https://www.tokopedia.com/salam?t_id=1777513306107&t_st=5&t_pp=product_detail&t_efo=search_pure_goods_card&t_ef=goods_search&t_sm=&t_spt=search_result" className="text-sm text-gray-600 font-medium hover:text-green-500 block">Tokopedia Salam</a>
+              </li>
+              <li>
+                <a href="https://www.tokopedia.com/p?t_id=1777513306107&t_st=5&t_pp=product_detail&t_efo=search_pure_goods_card&t_ef=goods_search&t_sm=&t_spt=search_result" className="text-sm text-gray-600 font-medium hover:text-green-500 block">Kategori</a>
+              </li>
+            </ul>
+
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3 mt-10 mb-10">
+              {[
+                { title: "Tokopedia Care", url: "https://www.tokopedia.com/help" },
+                { title: "Syarat & Ketentuan", url: "https://www.tokopedia.com/terms" },
+                { title: "Kebijakan Privasi", url: "https://www.tokopedia.com/privacy" },
+                { title: "Tentang Tokopedia", url: "https://www.tokopedia.com/about" },
+                { title: "Karier", url: "https://www.tokopedia.com/careers" },
+                { title: "Blog", url: "https://www.tokopedia.com/blog" },
+                { title: "Affiliate Program", url: "https://www.tokopedia.com/affiliate" },
+                { title: "Mitra Tokopedia", url: "https://www.tokopedia.com/mitra" },
+                { title: "Seller Education", url: "https://seller.tokopedia.com/edu" },
+                { title: "Pusat Resolusi", url: "https://www.tokopedia.com/resolution-center" },
+                { title: "Hubungi Kami", url: "https://www.tokopedia.com/contact" }
+              ].map((link, idx) => (
+                <a 
+                  key={`footer-link-${idx}`}
+                  href={link.url}
+                  className="text-[12px] text-gray-500 font-medium hover:text-green-500 transition-colors"
+                >
+                  {link.title}
+                </a>
+              ))}
+            </div>
+
+            <div className="mb-10">
+              <h3 className="font-bold text-[14px] mb-4">Gunakan Aplikasi Tokopedia</h3>
+              <div className="w-full">
+                <img 
+                  src="https://t4.ftcdn.net/jpg/04/01/40/99/360_F_401409954_fy0cxNyYj63BaHqgagkuEe8WCeb2FCvk.jpg" 
+                  alt="Download Tokopedia App" 
+                  className="w-full h-auto rounded-lg bg-white border border-gray-100"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
+
+            <p className="text-[12px] font-bold text-gray-400 mt-12 tracking-tight">© 2009 - 2026, PT Tokopedia</p>
+          </section>
 
         </div>
       </main>
