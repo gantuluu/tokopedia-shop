@@ -150,7 +150,7 @@ export default function App() {
   if (loading) {
 // ... existing loading UI ...
     return (
-      <div className="flex items-center justify-center h-screen bg-white max-w-md mx-auto shadow-2xl">
+      <div className="flex items-center justify-center h-full bg-white max-w-md mx-auto shadow-2xl">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-sm font-bold text-gray-500">Menghubungkan ke Database...</p>

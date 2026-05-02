@@ -133,7 +133,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ produks, onAdd, onEdit,
 
   if (editingId || isAdding) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col max-w-md mx-auto shadow-2xl overflow-y-auto pb-20">
+      <div className="min-h-full bg-gray-50 flex flex-col max-w-md mx-auto shadow-2xl overflow-y-auto pb-20">
         <header className="p-4 bg-white border-b sticky top-0 z-10 flex items-center gap-3">
           <button onClick={() => { setEditingId(null); setIsAdding(false); }} className="p-2 hover:bg-gray-100 rounded-full">
             <ChevronLeft size={20} />
@@ -334,7 +334,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ produks, onAdd, onEdit,
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col max-w-md mx-auto shadow-2xl relative">
+    <div className="min-h-full bg-gray-50 flex flex-col max-w-md mx-auto shadow-2xl relative">
       <header className="p-4 bg-white border-b sticky top-0 z-10 flex items-center justify-between">
         <div className="flex items-center gap-3">
            <button onClick={() => window.location.href = '/'} className="p-2 hover:bg-gray-100 rounded-full">

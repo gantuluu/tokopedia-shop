@@ -127,7 +127,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-white max-w-md mx-auto shadow-2xl">
+      <div className="flex items-center justify-center h-full bg-white max-w-md mx-auto shadow-2xl">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="text-sm font-bold text-gray-500">Memuat produk...</p>
@@ -138,7 +138,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
 
   if (error || !product) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white px-6 text-center max-w-md mx-auto shadow-2xl py-12 overflow-y-auto">
+      <div className="flex items-center justify-center min-h-full bg-white px-6 text-center max-w-md mx-auto shadow-2xl py-12 overflow-y-auto">
         <div className="flex flex-col items-center gap-6 w-full py-10">
           <img 
             src="https://p16-images-comn-sg.tokopedia-static.net/tos-alisg-i-zr7vqa5nfb-sg/assets-unify/img/il-error-not-found.png~tplv-zr7vqa5nfb-image.image" 
@@ -171,7 +171,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
   const discountPercentage = currentPrice > 0 ? Math.round(((currentPrice - currentSalePrice) / currentPrice) * 100) : 0;
 
   return (
-    <div className="max-w-md mx-auto h-screen flex flex-col bg-white font-sans text-gray-900 relative shadow-2xl overflow-hidden select-none" style={{ touchAction: 'pan-x pan-y' }}>
+    <div className="max-w-md mx-auto h-full flex flex-col bg-white font-sans text-gray-900 relative shadow-2xl overflow-hidden select-none" style={{ touchAction: 'pan-x pan-y' }}>
       <header className={`w-full z-50 transition-all duration-300 px-4 py-3 flex items-center justify-between shrink-0 absolute top-0 ${scrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
         <div className="flex items-center gap-3">
           <button onClick={() => window.location.href = 'https://www.tokopedia.com/'} className={`p-2 rounded-full transition ${scrolled ? 'bg-gray-100' : 'bg-black/20 text-white backdrop-blur-sm'}`}><MoreVertical className="w-5 h-5" /></button>
