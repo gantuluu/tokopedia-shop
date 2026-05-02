@@ -290,6 +290,15 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ produks, onAdd, onEdit,
                   className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-green-500"
                 />
               </div>
+              <div>
+                <label className="text-xs font-bold text-gray-500 block mb-1">Lokasi Toko</label>
+                <input 
+                  type="text" 
+                  value={formData.shop_location || ''} 
+                  onChange={e => updateField('shop_location', e.target.value)}
+                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-green-500"
+                />
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-bold text-gray-500 block mb-1">Rating Toko</label>
