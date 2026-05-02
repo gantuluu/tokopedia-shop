@@ -9,9 +9,22 @@ import {
   Store, 
   Image as ImageIcon,
   ChevronLeft,
-  ExternalLink
+  ExternalLink,
+  RefreshCw
 } from 'lucide-react';
 import { Product, ColorVariant, StorageVariant } from '../types';
+
+const generateProdukId = () => {
+  const chars = 'asdf0123456789';
+  let n = Date.now();
+  let res = '';
+  for (let i = 0; i < 8; i++) {
+    const r = Math.floor(Math.random() * chars.length);
+    res += chars[(n + r) % chars.length];
+    n = Math.floor(n / chars.length);
+  }
+  return res;
+};
 
 interface AdminDashboardProps {
   produks: Product[];
@@ -57,7 +70,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ produks, onAdd, onEdit,
   };
 
   const handleAddNew = () => {
-    setFormData(emptyProduct);
+    setFormData({ ...emptyProduct, produks_id: generateProdukId() });
     setIsAdding(true);
     setEditingId(null);
   };
@@ -133,14 +146,24 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ produks, onAdd, onEdit,
             <h2 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Informasi Utama</h2>
             <div className="space-y-3">
               <div>
-                <label className="text-xs font-bold text-gray-500 block mb-1">ID Produk</label>
-                <input 
-                  type="text" 
-                  value={formData.produks_id || ''} 
-                  onChange={e => updateField('produks_id', e.target.value)}
-                  className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-green-500"
-                  placeholder="Contoh: iphone-15-pro"
-                />
+                <label className="text-xs font-bold text-gray-500 block mb-1 text-[#00AA5B]">ID Produk (Unik)</label>
+                <div className="flex gap-2">
+                  <input 
+                    type="text" 
+                    value={formData.produks_id || ''} 
+                    onChange={e => updateField('produks_id', e.target.value.replace(/[^asdf0123456789]/g, '').slice(0, 8))}
+                    className="flex-1 bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm outline-none focus:border-green-500 font-mono tracking-wider transition-all placeholder:text-gray-300"
+                    placeholder="a1s2d3f4"
+                    maxLength={8}
+                  />
+                  <button 
+                    onClick={() => updateField('produks_id', generateProdukId())}
+                    className="px-4 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-all active:scale-95 border border-green-100"
+                    title="Generate ID Baru"
+                  >
+                    <RefreshCw size={18} />
+                  </button>
+                </div>
               </div>
               <div>
                 <label className="text-xs font-bold text-gray-500 block mb-1">Judul Produk</label>
