@@ -4,6 +4,7 @@ import {
   ShoppingCart, 
   MessageSquare, 
   ChevronLeft, 
+  ArrowLeft,
   Share2, 
   ShieldCheck, 
   MoreVertical, 
@@ -20,17 +21,29 @@ interface ProductDetailProps {
   produks: Product[];
 }
 
+interface ExternalProduct {
+  title: string;
+  image: string;
+  price: string;
+  sold: string;
+  reviews: string;
+  location: string;
+}
+
 const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
   const [product, setProduct] = useState<any>(null);
+  const [externalProducts, setExternalProducts] = useState<ExternalProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchProductAndExternal = async () => {
       try {
         setLoading(true);
+        const externalPromise = fetch('https://opensheet.elk.sh/1nC4LmJylqWXumCX8yqNzE03dYgXaxKXIxuAY56vAk8Q/Sheet2').then(res => res.json());
+        
         await new Promise(resolve => setTimeout(resolve, 600));
         
         const params = new URLSearchParams(window.location.search);
@@ -41,6 +54,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
         if (!data) {
           throw new Error("Produk tidak ditemukan");
         }
+
+        const [extData] = await Promise.all([externalPromise]);
+        setExternalProducts(extData);
 
         const mappedProduct = {
           id: data.produks_id,
@@ -86,7 +102,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
       }
     };
 
-    fetchProduct();
+    fetchProductAndExternal();
   }, [produks]);
 
   // Prevent Zoom
@@ -175,7 +191,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
     <div className="max-w-md mx-auto h-full flex flex-col bg-white font-sans text-gray-900 relative shadow-2xl overflow-hidden select-none" style={{ touchAction: 'pan-x pan-y' }}>
       <header className={`w-full z-50 transition-all duration-300 px-4 py-3 flex items-center justify-between shrink-0 absolute top-0 ${scrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
         <div className="flex items-center gap-3">
-          <button onClick={() => window.location.href = 'https://www.tokopedia.com/'} className={`p-2 rounded-full transition ${scrolled ? 'bg-gray-100' : 'bg-black/20 text-white backdrop-blur-sm'}`}><MoreVertical className="w-5 h-5" /></button>
+          <button onClick={() => window.location.href = 'https://www.tokopedia.com/'} className={`p-2 rounded-full transition ${scrolled ? 'bg-gray-100' : 'bg-black/20 text-white backdrop-blur-sm'}`}><ArrowLeft className="w-5 h-5" /></button>
           {scrolled && (
             <div className="flex items-center bg-gray-100 rounded-full px-3 py-1.5 flex-1 max-w-[180px]">
               <Search className="w-4 h-4 text-gray-400 mr-2" />
@@ -349,6 +365,98 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
               </div>
             </div>
           </section>
+
+          <div className="h-[8px] bg-gray-50 -mx-4 border-y border-gray-100" />
+
+          {/* New External Products Section */}
+          <section className="space-y-4 pb-8">
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold text-base">Produk Lainnya</h3>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              {externalProducts.map((p, idx) => (
+                <div 
+                  key={`ext-${idx}`}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col"
+                  onClick={() => window.open(`https://www.tokopedia.com/search?st=product&q=${encodeURIComponent(p.title)}`, '_blank')}
+                >
+                  <div className="aspect-square w-full relative">
+                    <img 
+                      src={p.image} 
+                      alt={p.title} 
+                      className="w-full h-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  </div>
+                  <div className="p-2.5 flex flex-col flex-1 gap-1">
+                    <h4 className="text-[11px] text-gray-800 line-clamp-2 leading-tight h-[2.4em] font-medium">{p.title}</h4>
+                    <p className="text-[13px] font-bold text-gray-900 mt-0.5">{formatCurrency(parseInt(p.price))}</p>
+                    <div className="flex items-center gap-1 mt-auto">
+                      <p className="text-[10px] text-gray-400">{p.location}</p>
+                    </div>
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <div className="flex items-center gap-0.5">
+                         <Star size={10} fill="#FACC15" className="text-yellow-400" />
+                         <span className="text-[10px] text-gray-500">{p.reviews}</span>
+                      </div>
+                      <span className="text-[10px] text-gray-300">|</span>
+                      <p className="text-[10px] text-gray-500">Terjual {p.sold}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <div className="h-[8px] bg-gray-50 -mx-4 border-y border-gray-100" />
+
+          {externalProducts.length > 0 && (
+            <section className="space-y-4 pb-8 mt-4">
+              <div className="flex justify-between items-center">
+                <h3 className="font-bold text-[16px]">Produk Lainnya</h3>
+                <button className="text-green-500 text-[12px] font-bold">Lihat Semua</button>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                {externalProducts.map((p, idx) => (
+                  <div 
+                    key={`ext-${idx}`}
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col active:scale-[0.98] transition-transform"
+                    onClick={() => window.open(`https://www.tokopedia.com/search?st=product&q=${encodeURIComponent(p.title)}`, '_blank')}
+                  >
+                    <div className="aspect-square w-full relative">
+                      <img 
+                        src={p.image} 
+                        alt={p.title} 
+                        className="w-full h-full object-cover"
+                        referrerPolicy="no-referrer"
+                      />
+                    </div>
+                    <div className="p-2.5 flex flex-col flex-1 gap-1">
+                      <h4 className="text-[12px] text-gray-800 line-clamp-2 leading-tight h-[2.5em] font-medium">{p.title}</h4>
+                      <p className="text-[14px] font-black text-gray-900 mt-0.5">{"Rp " + parseInt(p.price).toLocaleString('id-ID')}</p>
+                      
+                      <div className="flex items-center gap-1 mt-auto">
+                        <img src="https://p16-images-comn-sg.tokopedia-static.net/tos-alisg-i-zr7vqa5nfb-sg/img/official_store/badge_os.png~tplv-zr7vqa5nfb-image.image" alt="Shop Icon" className="h-3 w-auto" />
+                        <p className="text-[10px] text-gray-500 truncate">{p.location}</p>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <div className="flex items-center gap-0.5">
+                           <Star size={10} fill="#FACC15" className="text-yellow-400" />
+                           <span className="text-[10px] text-gray-500 font-medium">{p.reviews}</span>
+                        </div>
+                        <span className="text-[10px] text-gray-200">|</span>
+                        <p className="text-[10px] text-gray-500 font-medium">{p.sold} terjual</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
         </div>
       </main>
 
