@@ -138,41 +138,29 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
 
   if (error || !product) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-50 px-6 text-center max-w-md mx-auto shadow-2xl py-12">
-        <div className="flex flex-col items-center gap-6 w-full">
-          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center shadow-inner">
-            <Search className="w-10 h-10 text-red-500" />
-          </div>
+      <div className="flex items-center justify-center min-h-screen bg-white px-6 text-center max-w-md mx-auto shadow-2xl py-12 overflow-y-auto">
+        <div className="flex flex-col items-center gap-6 w-full py-10">
+          <img 
+            src="https://p16-images-comn-sg.tokopedia-static.net/tos-alisg-i-zr7vqa5nfb-sg/assets-unify/img/il-error-not-found.png~tplv-zr7vqa5nfb-image.image" 
+            alt="Produk Tidak Ditemukan" 
+            className="w-64 h-auto"
+            referrerPolicy="no-referrer"
+          />
           <div className="space-y-2">
-            <h2 className="text-2xl font-black text-gray-900">Oops! Produk Tidak Ditemukan</h2>
-            <p className="text-sm text-gray-500">Mungkin ID produk salah atau produk sudah tidak tersedia.</p>
+            <h2 className="text-xl font-bold text-gray-900">Waduh, tujuanmu nggak ada!</h2>
+            <p className="text-xs text-gray-500 leading-relaxed max-w-[280px]">
+              Mungkin kamu salah jalan atau alamat. Ayo balik sebelum gelap!
+            </p>
           </div>
           
-          <div className="w-full space-y-3 pt-6">
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest text-left">Produk Tersedia:</p>
-              {produks.map((p, idx) => (
-                <button 
-                  key={p.produks_id || `prod-${idx}`}
-                  onClick={() => window.location.href = `?produks_id=${p.produks_id}`}
-                  className="w-full flex items-center gap-4 bg-white p-3 rounded-2xl shadow-sm border border-gray-100 hover:border-green-500 transition-all group"
-                >
-                  {p.media?.[0] ? (
-                    <img src={p.media[0]} alt="" className="w-12 h-12 rounded-xl object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center">
-                      <Package size={16} className="text-gray-300" />
-                    </div>
-                  )}
-                  <div className="flex-1 text-left">
-                    <p className="text-xs font-bold text-gray-800 line-clamp-1">{p.title}</p>
-                    <p className="text-[10px] text-green-600 font-bold">{formatCurrency(p.sale_price)}</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-green-500" />
-                </button>
-              ))}
+          <div className="w-full pt-4">
+            <button 
+              onClick={() => window.location.href = 'https://www.tokopedia.com/'} 
+              className="w-full py-3.5 bg-green-500 text-white font-black rounded-xl text-sm shadow-lg shadow-green-100 active:scale-[0.98] transition-all"
+            >
+              Kembali
+            </button>
           </div>
-
-          <button onClick={() => window.location.href = '/'} className="mt-4 px-8 py-3 bg-green-500 text-white font-black rounded-xl shadow-lg shadow-green-100 hover:scale-105 transition-transform active:scale-95">Kembali ke Beranda</button>
         </div>
       </div>
     );
@@ -186,7 +174,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
     <div className="max-w-md mx-auto h-screen flex flex-col bg-white font-sans text-gray-900 relative shadow-2xl overflow-hidden select-none" style={{ touchAction: 'pan-x pan-y' }}>
       <header className={`w-full z-50 transition-all duration-300 px-4 py-3 flex items-center justify-between shrink-0 absolute top-0 ${scrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
         <div className="flex items-center gap-3">
-          <button onClick={() => window.location.href = '/admin'} className={`p-2 rounded-full transition ${scrolled ? 'bg-gray-100' : 'bg-black/20 text-white backdrop-blur-sm'}`}><MoreVertical className="w-5 h-5" /></button>
+          <button onClick={() => window.location.href = 'https://www.tokopedia.com/'} className={`p-2 rounded-full transition ${scrolled ? 'bg-gray-100' : 'bg-black/20 text-white backdrop-blur-sm'}`}><MoreVertical className="w-5 h-5" /></button>
           {scrolled && (
             <div className="flex items-center bg-gray-100 rounded-full px-3 py-1.5 flex-1 max-w-[180px]">
               <Search className="w-4 h-4 text-gray-400 mr-2" />
