@@ -54,6 +54,41 @@ export default function App() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    // Disable iOS Safari gestures
+    const handleGesture = (e: Event) => e.preventDefault();
+    document.addEventListener("gesturestart", handleGesture);
+    document.addEventListener("gesturechange", handleGesture);
+    document.addEventListener("gestureend", handleGesture);
+
+    // Disable Ctrl + Scroll zoom
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("wheel", handleWheel, { passive: false });
+
+    // Disable keyboard zoom
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (
+        (e.ctrlKey && (e.key === "+" || e.key === "-" || e.key === "=")) ||
+        (e.ctrlKey && e.key === "0")
+      ) {
+        e.preventDefault();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("gesturestart", handleGesture);
+      document.removeEventListener("gesturechange", handleGesture);
+      document.removeEventListener("gestureend", handleGesture);
+      window.removeEventListener("wheel", handleWheel);
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   const handleAddProduct = async (newProduct: Product) => {
 // ... same logic ...
     try {
