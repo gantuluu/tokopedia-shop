@@ -11,6 +11,7 @@ import {
   Truck, 
   Search, 
   Package,
+  ThumbsUp,
   Image as ImageIcon
 } from 'lucide-react';
 import { Product } from '../types';
@@ -244,10 +245,27 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
 
           <section className="space-y-3">
             <div className="flex items-start gap-3">
-              <div className="relative flex-shrink-0"><div className="w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-[#8DD5CF] to-[#00AA5B]"><div className="w-full h-full rounded-full bg-white p-[2px]"><img src={product.shop.image} alt="Shop Logo" className="w-full h-full rounded-full object-contain" referrerPolicy="no-referrer" /></div></div></div>
+              <div className="relative flex-shrink-0"><div className="w-14 h-14 rounded-full p-[2px] bg-gradient-to-tr from-[#8DD5CF] to-[#00AA5B]"><div className="w-full h-full rounded-full bg-white p-[2px]"><img src="https://images.tokopedia.net/img/cache/100-square/tPxBYm/2023/1/20/cf438cd7-a9f8-435f-910d-726100b587db.jpg" alt="Shop Logo" className="w-full h-full rounded-full object-contain" referrerPolicy="no-referrer" /></div></div></div>
               <div className="flex-1"><div className="flex items-center gap-1 mb-0.5"><img src="https://p16-images-comn-sg.tokopedia-static.net/tos-alisg-i-zr7vqa5nfb-sg/img/official_store/badge_os.png~tplv-zr7vqa5nfb-image.image" alt="Official Store" className="h-4 w-auto" referrerPolicy="no-referrer" /><h2 className="text-[16px] font-bold truncate leading-tight">{product.shop.name}</h2></div><p className="text-[12px] text-gray-500">{product.shop.location}</p></div>
             </div>
             <div className="flex items-center justify-between mt-1"><div className="flex gap-4"><div className="flex items-center gap-1.5"><Star size={16} fill="#FACC15" className="text-yellow-400" /><span className="text-[13px] font-bold">{product.rating_average}</span></div><div className="flex items-center gap-1.5"><Package size={16} className="text-gray-400" /><span className="text-[13px] font-bold text-gray-900">{product.stock_total}</span><span className="text-[13px] text-gray-500">total barang</span></div></div><button className="px-6 py-1.5 rounded-lg font-bold text-[13px] border border-gray-300 text-gray-800">Follow</button></div>
+            
+            <div className="flex items-center overflow-x-auto no-scrollbar whitespace-nowrap w-full py-2 gap-0">
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <img className="w-5 h-5 object-contain" alt="Pasti Ori" referrerPolicy="no-referrer" src="https://images.tokopedia.net/img/pdp/trust-markers/badge_verified.png" />
+                <span className="text-[11px] font-bold text-gray-800">Pasti Ori</span>
+              </div>
+              <span className="px-3 text-gray-300 font-bold flex-shrink-0">•</span>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <img className="w-5 h-5 object-contain" alt="Pembayaran Aman" referrerPolicy="no-referrer" src="https://images.tokopedia.net/img/pdp/trust-markers/verified_payment.png" />
+                <span className="text-[11px] font-bold text-gray-800">Pembayaran Aman</span>
+              </div>
+              <span className="px-3 text-gray-300 font-bold flex-shrink-0">•</span>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <img className="w-5 h-5 object-contain" alt="Tokopedia Care" referrerPolicy="no-referrer" src="https://images.tokopedia.net/img/pdp/trust-markers/help_center.png" />
+                <span className="text-[11px] font-bold text-gray-800">Tokopedia Care 24 Jam</span>
+              </div>
+            </div>
           </section>
 
           <div className="h-[8px] bg-gray-50 -mx-4 border-y border-gray-100" />
@@ -259,6 +277,78 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
           </section>
 
           <div className="h-[8px] bg-gray-50 -mx-4 border-y border-gray-100" />
+
+          <section className="space-y-4 pb-4">
+            <div className="flex justify-between items-center">
+              <h3 className="font-bold text-base">Ulasan Pembeli</h3>
+              <button className="text-green-500 text-xs font-bold">Lihat Semua</button>
+            </div>
+            
+            <div className="flex gap-4 items-center">
+              <div className="text-center bg-gray-50 rounded-2xl p-4 min-w-[100px]">
+                <div className="flex items-center justify-center gap-1">
+                  <Star className="w-6 h-6 fill-yellow-400 text-yellow-400" />
+                  <span className="text-3xl font-black">4.9</span>
+                </div>
+                <p className="text-[10px] text-gray-400 mt-1 uppercase font-bold tracking-tighter">Dari 856 Rating</p>
+              </div>
+              
+              <div className="flex-1 space-y-1">
+                {[5, 4, 3, 2, 1].map((num, i) => (
+                  <div key={`rating-bar-${num}`} className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold w-2 text-gray-600">{num}</span>
+                    <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-yellow-400" style={{ width: i === 0 ? '85%' : i === 1 ? '10%' : '2%' }}></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-2">
+              <div className="border-b border-gray-50 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={`star-1-${i}`} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <span className="text-[10px] text-gray-400">2 hari lalu</span>
+                </div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center text-[8px] font-bold text-blue-500">B</div>
+                  <p className="text-xs font-bold">Budi S.</p>
+                </div>
+                <p className="text-xs text-gray-600 italic">"Barang original, sampai dengan selamat. Mantap buat seller."</p>
+                <div className="mt-2">
+                  <button className="flex items-center gap-1 text-[10px] font-bold text-gray-400 hover:text-green-500 transition">
+                    <ThumbsUp className="w-3 h-3" /> Membantu
+                  </button>
+                </div>
+              </div>
+
+              <div className="border-b border-gray-50 pb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-1">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={`star-2-${i}`} className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <span className="text-[10px] text-gray-400">4 hari lalu</span>
+                </div>
+                <div className="flex items-center gap-2 mb-1">
+                  <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center text-[8px] font-bold text-blue-500">A</div>
+                  <p className="text-xs font-bold">Andi W.</p>
+                </div>
+                <p className="text-xs text-gray-600 italic">"Box mulus segel greenpeel."</p>
+                <div className="mt-2">
+                  <button className="flex items-center gap-1 text-[10px] font-bold text-gray-400 hover:text-green-500 transition">
+                    <ThumbsUp className="w-3 h-3" /> Membantu
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
 
