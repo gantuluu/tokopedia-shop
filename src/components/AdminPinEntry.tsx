@@ -9,7 +9,7 @@ interface AdminPinEntryProps {
 export default function AdminPinEntry({ onSuccess }: AdminPinEntryProps) {
   const [pin, setPin] = useState('');
   const [error, setError] = useState(false);
-  const correctPin = '6776123';
+  const correctPin = '677677';
 
   const handlePinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, '');
