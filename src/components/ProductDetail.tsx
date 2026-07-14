@@ -14,9 +14,14 @@ import {
   Search, 
   Package,
   ThumbsUp,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Check,
+  X,
+  Minus,
+  Plus
 } from 'lucide-react';
 import { Product } from '../types';
+import CartView, { CartItem } from './CartView';
 
 interface ProductDetailProps {
   produks: Product[];
@@ -38,6 +43,24 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
   const [error, setError] = useState<string | null>(null);
   const [activeImage, setActiveImage] = useState(0);
   const [scrolled, setScrolled] = useState(false);
+
+  // Cart and Variant state variables
+  const [cartItems, setCartItems] = useState<CartItem[]>(() => {
+    try {
+      return JSON.parse(localStorage.getItem('tokopedia_cart') || '[]');
+    } catch {
+      return [];
+    }
+  });
+  const [showCart, setShowCart] = useState(false);
+  const [showVariantSheet, setShowVariantSheet] = useState(false);
+  const [variantAction, setVariantAction] = useState<'cart' | 'buy'>('cart');
+  const [selectedColor, setSelectedColor] = useState<any>(null);
+  const [selectedStorage, setSelectedStorage] = useState<any>(null);
+  const [cartQuantity, setCartQuantity] = useState(1);
+  const [showToast, setShowToast] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
 
   useEffect(() => {
     const fetchProductAndExternal = async () => {
@@ -95,6 +118,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
         };
 
         setProduct(mappedProduct);
+        if (mappedProduct.variants.colors && mappedProduct.variants.colors.length > 0) {
+          setSelectedColor(mappedProduct.variants.colors[0]);
+        }
+        if (mappedProduct.variants.storage && mappedProduct.variants.storage.length > 0) {
+          setSelectedStorage(mappedProduct.variants.storage[0]);
+        }
         setError(null);
       } catch (err: any) {
         setError(err.message);
@@ -142,6 +171,98 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
       minimumFractionDigits: 0,
     }).format(amount);
   };
+
+  const handleOpenVariantSheet = (action: 'cart' | 'buy') => {
+    setVariantAction(action);
+    setCartQuantity(1);
+    
+    // Set first options if not already set
+    if (product) {
+      if (product.variants.colors && product.variants.colors.length > 0 && !selectedColor) {
+        setSelectedColor(product.variants.colors[0]);
+      }
+      if (product.variants.storage && product.variants.storage.length > 0 && !selectedStorage) {
+        setSelectedStorage(product.variants.storage[0]);
+      }
+    }
+    
+    setShowVariantSheet(true);
+  };
+
+  const handleAddToCart = () => {
+    if (!product) return;
+
+    const colorName = selectedColor?.name || 'Default';
+    
+    // Check if selectedStorage is a string or a StorageVariant object
+    let storageName = 'Default';
+    let storagePrice = product.sale_price;
+
+    if (selectedStorage) {
+      if (typeof selectedStorage === 'string') {
+        storageName = selectedStorage;
+      } else if (typeof selectedStorage === 'object') {
+        storageName = selectedStorage.storage || 'Default';
+        storagePrice = selectedStorage.sale_price || selectedStorage.price || product.sale_price;
+      }
+    }
+
+    const itemId = `${product.id}-${colorName}-${storageName}`;
+    const itemImage = selectedColor?.imgUrl || selectedColor?.image || (product.media && product.media[0]) || '';
+
+    const newCartItem: CartItem = {
+      id: itemId,
+      productId: product.id,
+      title: product.title,
+      price: storagePrice,
+      image: itemImage,
+      shopName: product.shop.name,
+      shopLocation: product.shop.location,
+      shopImage: product.shop.image,
+      isOfficial: product.shop.isOfficial,
+      color: colorName !== 'Default' ? colorName : undefined,
+      storage: storageName !== 'Default' ? storageName : undefined,
+      quantity: cartQuantity,
+      selected: true,
+      productUrl: product.url_tokopedia
+    };
+
+    setCartItems(prev => {
+      const existingIdx = prev.findIndex(item => item.id === itemId);
+      let updated;
+      if (existingIdx > -1) {
+        updated = prev.map((item, idx) => 
+          idx === existingIdx ? { ...item, quantity: item.quantity + cartQuantity } : item
+        );
+      } else {
+        updated = [...prev, newCartItem];
+      }
+      localStorage.setItem('tokopedia_cart', JSON.stringify(updated));
+      return updated;
+    });
+
+    setShowVariantSheet(false);
+
+    if (variantAction === 'buy') {
+      setShowCart(true);
+    } else {
+      setIsAddingToCart(true);
+      setTimeout(() => {
+        setIsAddingToCart(false);
+        setShowCart(true);
+      }, 2000);
+    }
+  };
+
+  useEffect(() => {
+    if (showToast) {
+      const timer = setTimeout(() => {
+        setShowToast(false);
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
+
 
   if (loading) {
     return (
@@ -202,9 +323,17 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
         </div>
         <div className="flex gap-2">
           <button className={`p-2 rounded-full transition ${scrolled ? 'bg-gray-100' : 'bg-black/20 text-white backdrop-blur-sm'}`}><Share2 className="w-5 h-5" /></button>
-          <button className={`p-2 rounded-full transition relative ${scrolled ? 'bg-gray-100' : 'bg-black/20 text-white backdrop-blur-sm'}`}>
+          <button 
+            id="header-cart-button"
+            onClick={() => setShowCart(true)}
+            className={`p-2 rounded-full transition relative ${scrolled ? 'bg-gray-100' : 'bg-black/20 text-white backdrop-blur-sm'}`}
+          >
             <ShoppingCart className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+            {cartItems.reduce((acc, i) => acc + i.quantity, 0) > 0 && (
+              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white animate-scale-in">
+                {cartItems.reduce((acc, i) => acc + i.quantity, 0)}
+              </span>
+            )}
           </button>
         </div>
       </header>
@@ -547,12 +676,246 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ produks }) => {
       </main>
 
       <footer className="w-full bg-white border-t border-gray-100 px-4 py-4 z-50 flex items-center gap-3 shrink-0">
-        <button className="p-3 border border-gray-200 rounded-xl"><MessageSquare className="w-6 h-6 text-gray-600" /></button>
+        <button className="p-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"><MessageSquare className="w-6 h-6 text-gray-600" /></button>
         <div className="flex-1 flex gap-2">
-          <button onClick={() => window.open(product.url_tokopedia, '_blank')} className="flex-1 bg-white border-2 border-green-500 text-green-500 font-black py-3 rounded-xl text-xs">Beli Langsung</button>
-          <button onClick={() => window.open(product.url_tokopedia, '_blank')} className="flex-1 bg-green-500 text-white font-black py-3 rounded-xl text-xs shadow-lg shadow-green-100">+ Keranjang</button>
+          <button 
+            id="footer-buy-button"
+            onClick={() => handleOpenVariantSheet('buy')}
+            className="flex-1 bg-white border-2 border-green-500 text-green-500 font-extrabold py-3 rounded-xl text-xs transition-transform active:scale-[0.98]"
+          >
+            Beli Langsung
+          </button>
+          <button 
+            id="footer-cart-button"
+            onClick={() => handleOpenVariantSheet('cart')}
+            className="flex-1 bg-green-500 text-white font-extrabold py-3 rounded-xl text-xs shadow-lg shadow-green-100 transition-transform active:scale-[0.98]"
+          >
+            + Keranjang
+          </button>
         </div>
       </footer>
+
+      {/* Cart View Overlay Page */}
+      <CartView 
+        isOpen={showCart}
+        onClose={() => setShowCart(false)}
+        cartItems={cartItems}
+        setCartItems={setCartItems}
+        externalProducts={externalProducts}
+        formatCurrency={formatCurrency}
+      />
+
+      {/* Floating Success Toast (Tokopedia Style) */}
+      <AnimatePresence>
+        {showToast && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="absolute bottom-20 left-4 right-4 z-[90] bg-gray-900 text-white px-4 py-3 rounded-2xl flex items-center justify-between gap-3 shadow-xl border border-gray-800"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-8 h-8 rounded bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                <Check className="w-5 h-5 text-emerald-400" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-gray-100 truncate">Berhasil dimasukkan</p>
+                <p className="text-[10px] text-gray-400 truncate">Yuk cek keranjang belanjamu sekarang.</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => {
+                setShowToast(false);
+                setShowCart(true);
+              }}
+              className="px-4 py-1.5 bg-[#00AA5B] hover:bg-[#009650] text-white font-black rounded-lg text-[11px] shrink-0 transition-colors shadow"
+            >
+              Lihat
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Loading Overlay (Tokopedia Style) */}
+      <AnimatePresence>
+        {isAddingToCart && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 bg-white/95 backdrop-blur-sm z-[150] flex flex-col items-center justify-center p-6 text-center"
+          >
+            <div className="flex flex-col items-center gap-4">
+              <div className="relative w-16 h-16">
+                <div className="absolute inset-0 border-4 border-emerald-100 rounded-full"></div>
+                <div className="absolute inset-0 border-4 border-[#00AA5B] border-t-transparent rounded-full animate-spin"></div>
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-extrabold text-gray-900">Menambahkan ke keranjang...</p>
+                <p className="text-xs text-gray-400">Sedang memproses pesananmu</p>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Variant Selection Bottom Sheet */}
+      <AnimatePresence>
+        {showVariantSheet && (
+          <>
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowVariantSheet(false)}
+              className="absolute inset-0 bg-black z-[101]"
+            />
+            
+            {/* Bottom Sheet Container */}
+            <motion.div 
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 220 }}
+              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl z-[102] flex flex-col shadow-2xl max-h-[85%] border-t border-gray-100 font-sans"
+            >
+              
+              {/* Sheet Header */}
+              <div className="p-4 flex gap-4 border-b border-gray-50 relative">
+                <button 
+                  onClick={() => setShowVariantSheet(false)}
+                  className="absolute top-4 right-4 p-1 hover:bg-gray-100 rounded-full transition-colors text-gray-400"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+                
+                {/* Variant Image */}
+                <div className="w-20 h-20 rounded-xl border border-gray-100 overflow-hidden bg-gray-50 shrink-0">
+                  <img 
+                    src={selectedColor?.imgUrl || selectedColor?.image || (product.media && product.media[0]) || ""} 
+                    alt={product.title} 
+                    className="w-full h-full object-cover"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+                
+                {/* Variant Price & Stock Info */}
+                <div className="flex flex-col justify-end">
+                  <p className="text-xl font-black text-[#FF5722]">
+                    {formatCurrency(selectedStorage?.sale_price || selectedStorage?.price || product.sale_price)}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Stok total: <span className="font-bold text-gray-700">{product.stock_total} barang</span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Sheet Content (Scrollable) */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-5 no-scrollbar pb-8">
+                
+                {/* Color Variants */}
+                {product.variants?.colors && product.variants.colors.length > 0 && (
+                  <div className="space-y-2.5">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pilih Warna</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {product.variants.colors.map((color: any, idx: number) => {
+                        const isSelected = selectedColor?.name === color.name;
+                        return (
+                          <button
+                            key={`variant-color-${idx}`}
+                            onClick={() => setSelectedColor(color)}
+                            className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all duration-200 flex items-center gap-2 ${
+                              isSelected 
+                                ? "border-[#00AA5B] bg-emerald-50/50 text-[#00AA5B]" 
+                                : "border-gray-200 hover:border-gray-300 text-gray-700"
+                            }`}
+                          >
+                            {color.hex && (
+                              <span 
+                                className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0" 
+                                style={{ backgroundColor: color.hex }}
+                              />
+                            )}
+                            {color.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Storage/Capacity Variants */}
+                {product.variants?.storage && product.variants.storage.length > 0 && (
+                  <div className="space-y-2.5">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pilih Kapasitas</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {product.variants.storage.map((v: any, idx: number) => {
+                        const vName = typeof v === 'string' ? v : v.storage;
+                        const sName = typeof selectedStorage === 'string' ? selectedStorage : selectedStorage?.storage;
+                        const isSelected = sName === vName;
+                        
+                        return (
+                          <button
+                            key={`variant-storage-${idx}`}
+                            onClick={() => setSelectedStorage(v)}
+                            className={`px-4 py-2.5 rounded-xl text-xs font-bold border transition-all duration-200 ${
+                              isSelected 
+                                ? "border-[#00AA5B] bg-emerald-50/50 text-[#00AA5B]" 
+                                : "border-gray-200 hover:border-gray-300 text-gray-700"
+                            }`}
+                          >
+                            {vName}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Quantity Control Selector */}
+                <div className="flex items-center justify-between pt-2">
+                  <div className="space-y-0.5">
+                    <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Jumlah Pembelian</h4>
+                    <p className="text-[10px] text-gray-400">Bisa beli maksimal {product.stock_total} barang</p>
+                  </div>
+                  <div className="flex items-center border border-gray-200 rounded-full bg-white shadow-sm shrink-0">
+                    <button 
+                      disabled={cartQuantity <= 1}
+                      onClick={() => setCartQuantity(prev => Math.max(1, prev - 1))}
+                      className="p-2 hover:bg-gray-50 text-gray-500 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                      <Minus className="w-4 h-4" />
+                    </button>
+                    <span className="text-sm font-bold text-gray-800 px-3 min-w-[30px] text-center">
+                      {cartQuantity}
+                    </span>
+                    <button 
+                      disabled={cartQuantity >= product.stock_total}
+                      onClick={() => setCartQuantity(prev => prev + 1)}
+                      className="p-2 hover:bg-gray-50 text-gray-500 transition-colors disabled:opacity-30 disabled:hover:bg-transparent"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Sheet Sticky Bottom Actions */}
+              <div className="p-4 border-t border-gray-50 bg-white">
+                <button
+                  onClick={handleAddToCart}
+                  className="w-full py-3.5 bg-[#00AA5B] hover:bg-[#009650] text-white font-extrabold rounded-xl text-sm transition-colors shadow-md"
+                >
+                  {variantAction === 'buy' ? 'Beli Langsung' : 'Masukkan Keranjang'}
+                </button>
+              </div>
+
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
